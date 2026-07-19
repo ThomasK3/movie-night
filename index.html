@@ -152,12 +152,89 @@
     animation: pad linear forwards; pointer-events: none; z-index: 5;
   }
   @keyframes pad { to { transform: translateY(110vh) rotate(720deg); } }
+
+  /* ===== INTRO ===== */
+  body.intro-bezi { overflow: hidden; }
+  .obsah, .paticka { opacity: 0; transform: translateY(16px); }
+  body.pripraveno .obsah, body.pripraveno .paticka {
+    opacity: 1; transform: translateY(0);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  #intro {
+    position: fixed; inset: 0; z-index: 100; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .opona {
+    position: absolute; top: 0; bottom: 0; width: 51%;
+    background:
+      repeating-linear-gradient(90deg,
+        #6d1126 0 14px, #8f1a35 14px 30px, #7c142c 30px 44px);
+    box-shadow: inset 0 -40px 60px rgba(0,0,0,.5);
+    transition: transform 1s cubic-bezier(.7, 0, .3, 1);
+  }
+  .opona.leva { left: 0; }
+  .opona.prava { right: 0; }
+  #intro.otevreno .opona.leva { transform: translateX(-102%); }
+  #intro.otevreno .opona.prava { transform: translateX(102%); }
+  #intro.otevreno { pointer-events: none; }
+
+  .odpocet {
+    position: relative; z-index: 2; text-align: center;
+    transition: opacity .35s ease;
+  }
+  #intro.otevreno .odpocet { opacity: 0; }
+  .odpocet .kruh {
+    width: 170px; height: 170px; margin: 0 auto 18px;
+    border: 4px solid rgba(253, 246, 227, .85); border-radius: 50%;
+    position: relative; display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, .35);
+    box-shadow: 0 0 0 10px rgba(0,0,0,.25), 0 0 60px rgba(0,0,0,.5);
+  }
+  .odpocet .kruh::before, .odpocet .kruh::after {
+    content: ''; position: absolute; background: rgba(253, 246, 227, .25);
+  }
+  .odpocet .kruh::before { width: 100%; height: 2px; }
+  .odpocet .kruh::after { width: 2px; height: 100%; }
+  .odpocet .rafije {
+    position: absolute; left: 50%; top: 50%; width: 2px; height: 50%;
+    background: rgba(253, 246, 227, .6); transform-origin: top center;
+    animation: toceni .8s linear infinite;
+  }
+  @keyframes toceni { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .odpocet .cislo {
+    font-size: 84px; font-weight: 800; color: var(--svetlo);
+    position: relative; z-index: 3; font-variant-numeric: tabular-nums;
+    animation: puls .8s ease infinite;
+  }
+  @keyframes puls { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(.92); opacity: .75; } }
+  .odpocet .titulek {
+    color: rgba(253, 246, 227, .9); font-size: 15px; letter-spacing: 3px;
+    text-transform: uppercase; font-weight: 600;
+  }
+  .odpocet .preskocit {
+    margin-top: 14px; font-size: 12px; color: rgba(253, 246, 227, .5);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, .hvezda, .konfeta { animation: none !important; transition: none !important; }
+    .obsah, .paticka { opacity: 1; transform: none; }
   }
 </style>
 </head>
-<body>
+<body class="intro-bezi">
+
+<div id="intro">
+  <div class="opona leva"></div>
+  <div class="opona prava"></div>
+  <div class="odpocet">
+    <div class="kruh">
+      <div class="rafije"></div>
+      <div class="cislo" id="introCislo">3</div>
+    </div>
+    <div class="titulek">Promítání začíná</div>
+    <div class="preskocit">klepni pro přeskočení</div>
+  </div>
+</div>
 
 <div class="obsah" id="hlavni">
   <div class="stitek">🎬 Soukromé kino · dnes večer · u mě doma</div>
@@ -201,26 +278,33 @@
     // Animáky
     { nazev: "Karcoolka", zanr: "Animák", emoji: "🐺", plakat: "karcoolka.jpg", tip: true, tmdb: "Hoodwinked", rok: 2005 },
     { nazev: "Jako kočky a psi: Pomsta prohnané Kitty", zanr: "Animák", emoji: "🐱", plakat: "kocky-a-psi.jpg", tmdb: "Cats & Dogs: The Revenge of Kitty Galore", rok: 2010 },
-    { nazev: "Shrek", zanr: "Animák", emoji: "🧅", plakat: "shrek.jpg", tmdb: "Shrek", rok: 2001 },
     { nazev: "Ratatouille", zanr: "Animák", emoji: "🐭", plakat: "ratatouille.jpg", tip: true, tmdb: "Ratatouille", rok: 2007 },
-    { nazev: "Kung Fu Panda", zanr: "Animák", emoji: "🐼", plakat: "kung-fu-panda.jpg", tmdb: "Kung Fu Panda", rok: 2008 },
     { nazev: "Coco", zanr: "Animák", emoji: "🎸", plakat: "coco.jpg", tmdb: "Coco", rok: 2017 },
     { nazev: "Vzhůru do oblak", zanr: "Animák", emoji: "🎈", plakat: "vzhuru-do-oblak.jpg", tip: true, tmdb: "Up", rok: 2009 },
     { nazev: "V hlavě", zanr: "Animák", emoji: "😊", plakat: "v-hlave.jpg", tmdb: "Inside Out", rok: 2015 },
-    // Fantasy / dobrodružné
-    { nazev: "Pán prstenů: Společenstvo prstenu", zanr: "Fantasy", emoji: "💍", plakat: "pan-prstenu.jpg", tmdb: "The Lord of the Rings: The Fellowship of the Ring", rok: 2001 },
-    { nazev: "Harry Potter a Kámen mudrců", zanr: "Fantasy", emoji: "🪄", plakat: "harry-potter.jpg", tmdb: "Harry Potter and the Philosopher's Stone", rok: 2001 },
-    { nazev: "Piráti z Karibiku: Prokletí Černé perly", zanr: "Fantasy", emoji: "☠️", plakat: "pirati-z-karibiku.jpg", tmdb: "Pirates of the Caribbean: The Curse of the Black Pearl", rok: 2003 },
-    { nazev: "Jumanji: Vítejte v džungli", zanr: "Fantasy", emoji: "🎮", plakat: "jumanji.jpg", tmdb: "Jumanji: Welcome to the Jungle", rok: 2017 },
+    // Nolan
+    { nazev: "Temný rytíř", zanr: "Nolan", emoji: "🦇", plakat: "temny-rytir.jpg", tmdb: "The Dark Knight", rok: 2008 },
+    { nazev: "Dokonalý trik", zanr: "Nolan", emoji: "🎩", plakat: "dokonaly-trik.jpg", tmdb: "The Prestige", rok: 2006 },
+    { nazev: "Memento", zanr: "Nolan", emoji: "📸", plakat: "memento.jpg", tmdb: "Memento", rok: 2000 },
+    { nazev: "Oppenheimer", zanr: "Nolan", emoji: "⚛️", plakat: "oppenheimer.jpg", tmdb: "Oppenheimer", rok: 2023 },
+    // Klasiky
+    { nazev: "Vykoupení z věznice Shawshank", zanr: "Klasika", emoji: "🕊️", plakat: "shawshank.jpg", tmdb: "The Shawshank Redemption", rok: 1994 },
+    { nazev: "Forrest Gump", zanr: "Klasika", emoji: "🏃", plakat: "forrest-gump.jpg", tmdb: "Forrest Gump", rok: 1994 },
+    { nazev: "Zelená míle", zanr: "Klasika", emoji: "🐁", plakat: "zelena-mile.jpg", tmdb: "The Green Mile", rok: 1999 },
+    { nazev: "Pulp Fiction", zanr: "Klasika", emoji: "💼", plakat: "pulp-fiction.jpg", tmdb: "Pulp Fiction", rok: 1994 },
+    { nazev: "Kmotr", zanr: "Klasika", emoji: "🌹", plakat: "kmotr.jpg", tmdb: "The Godfather", rok: 1972 },
+    { nazev: "Klub rváčů", zanr: "Klasika", emoji: "🧼", plakat: "klub-rvacu.jpg", tmdb: "Fight Club", rok: 1999 },
+    { nazev: "Gladiátor", zanr: "Klasika", emoji: "🗡️", plakat: "gladiator.jpg", tmdb: "Gladiator", rok: 2000 },
+    { nazev: "Pán prstenů: Společenstvo prstenu", zanr: "Klasika", emoji: "💍", plakat: "pan-prstenu.jpg", tmdb: "The Lord of the Rings: The Fellowship of the Ring", rok: 2001 },
     // Komedie
     { nazev: "Slunce, seno, jahody", zanr: "Komedie", emoji: "🌾", plakat: "slunce-seno-jahody.jpg", tip: true, tmdb: "Slunce, seno, jahody", rok: 1983 },
     { nazev: "Pelíšky", zanr: "Komedie", emoji: "🏠", plakat: "pelisky.jpg", tmdb: "Pelíšky", rok: 1999 },
     { nazev: "Blbý a blbější", zanr: "Komedie", emoji: "🚗", plakat: "blby-a-blbejsi.jpg", tmdb: "Dumb and Dumber", rok: 1994 },
     { nazev: "Noc v muzeu", zanr: "Komedie", emoji: "🏛️", plakat: "noc-v-muzeu.jpg", tmdb: "Night at the Museum", rok: 2006 },
-    { nazev: "Maska", zanr: "Komedie", emoji: "🎭", plakat: "maska.jpg", tmdb: "The Mask", rok: 1994 },
-    // Sci-fi / napětí
+    // Sci-fi
+    { nazev: "Matrix", zanr: "Sci-fi", emoji: "💊", plakat: "matrix.jpg", tmdb: "The Matrix", rok: 1999 },
+    { nazev: "Zpátky do budoucnosti", zanr: "Sci-fi", emoji: "⏰", plakat: "zpatky-do-budoucnosti.jpg", tmdb: "Back to the Future", rok: 1985 },
     { nazev: "Marťan", zanr: "Sci-fi", emoji: "🥔", plakat: "martan.jpg", tmdb: "The Martian", rok: 2015 },
-    { nazev: "Ready Player One", zanr: "Sci-fi", emoji: "🕹️", plakat: "ready-player-one.jpg", tmdb: "Ready Player One", rok: 2018 },
     { nazev: "Já, robot", zanr: "Sci-fi", emoji: "🤖", plakat: "ja-robot.jpg", tmdb: "I, Robot", rok: 2004 }
   ];
 
@@ -235,6 +319,46 @@
     s.style.animationDelay = Math.random() * 3 + 's';
     document.body.appendChild(s);
   }
+
+  // ===== INTRO: odpočet 3-2-1 → opona se roztáhne =====
+  (function() {
+    const intro = document.getElementById('intro');
+    const cislo = document.getElementById('introCislo');
+    let hotovo = false;
+
+    function ukoncit() {
+      if (hotovo) return;
+      hotovo = true;
+      intro.classList.add('otevreno');
+      document.body.classList.add('pripraveno');
+      document.body.classList.remove('intro-bezi');
+      setTimeout(() => intro.remove(), 1100);
+    }
+
+    // bez animací (reduced motion) → rovnou obsah
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      intro.remove();
+      document.body.classList.add('pripraveno');
+      document.body.classList.remove('intro-bezi');
+      return;
+    }
+
+    // klepnutí = přeskočit
+    intro.addEventListener('click', ukoncit);
+
+    // odpočet
+    const kroky = ['3', '2', '1', '🍿'];
+    let k = 0;
+    const interval = setInterval(() => {
+      k++;
+      if (k < kroky.length) {
+        cislo.textContent = kroky[k];
+      } else {
+        clearInterval(interval);
+        ukoncit();
+      }
+    }, 750);
+  })();
 
   // vykreslení filtrů
   const zanry = ["Všechny", ...new Set(FILMY.map(f => f.zanr))];
@@ -281,12 +405,20 @@
   });
 
   // 🖼️ automatické natažení plakátů z TMDB (když je vyplněný API klíč)
+  // Funguje s oběma typy: krátký "API Key (v3)" i dlouhý "Read Access Token (v4, začíná eyJ)"
   if (TMDB_API_KEY) {
+    const jeV4Token = TMDB_API_KEY.trim().startsWith("eyJ");
     FILMY.forEach(async f => {
       try {
-        const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}` +
-                    `&query=${encodeURIComponent(f.tmdb)}&year=${f.rok}&language=cs-CZ`;
-        const res = await fetch(url);
+        let url = `https://api.themoviedb.org/3/search/movie` +
+                  `?query=${encodeURIComponent(f.tmdb)}&year=${f.rok}&language=cs-CZ`;
+        const options = {};
+        if (jeV4Token) {
+          options.headers = { "Authorization": `Bearer ${TMDB_API_KEY.trim()}` };
+        } else {
+          url += `&api_key=${TMDB_API_KEY.trim()}`;
+        }
+        const res = await fetch(url, options);
         const json = await res.json();
         const poster = json.results && json.results[0] && json.results[0].poster_path;
         if (poster) {
