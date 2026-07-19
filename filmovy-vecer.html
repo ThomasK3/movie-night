@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Filmový večer? 🍿</title>
+<style>
+  :root {
+    --noc: #1b1430;
+    --noc2: #2a1f4a;
+    --popcorn: #ffd166;
+    --maslo: #ffb84d;
+    --ruzova: #ff7aa2;
+    --svetlo: #fdf6e3;
+    --karta: #241a3e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: radial-gradient(ellipse at top, var(--noc2) 0%, var(--noc) 70%);
+    min-height: 100vh;
+    color: var(--svetlo);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 80px;
+    overflow-x: hidden;
+  }
+  .hvezda {
+    position: fixed; color: var(--popcorn); opacity: .35;
+    animation: blik 3s infinite alternate; pointer-events: none; z-index: 0;
+  }
+  @keyframes blik { from { opacity: .15; } to { opacity: .55; } }
+
+  .obsah { position: relative; z-index: 1; max-width: 860px; width: 100%; text-align: center; }
+
+  .stitek {
+    display: inline-block; background: var(--ruzova); color: var(--noc);
+    font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 999px; margin-bottom: 20px;
+  }
+  h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.2; margin-bottom: 12px; }
+  h1 .zvyraz { color: var(--popcorn); }
+  .podtext { color: #cabfe6; font-size: 17px; margin-bottom: 28px; }
+  .podtext b { color: var(--svetlo); }
+
+  /* filtr žánrů */
+  .filtry {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 24px;
+  }
+  .filtr {
+    background: var(--karta); color: #b7a9dd; border: 2px solid transparent;
+    border-radius: 999px; padding: 8px 18px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all .15s; font-family: inherit;
+  }
+  .filtr:hover { color: var(--svetlo); }
+  .filtr.aktivni {
+    background: var(--popcorn); color: var(--noc); border-color: var(--popcorn);
+  }
+
+  /* filmové karty */
+  .filmy {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px; margin-bottom: 36px;
+  }
+  .film {
+    background: var(--karta); border: 2px solid transparent; border-radius: 14px;
+    overflow: hidden; cursor: pointer; user-select: none;
+    transition: transform .15s, border-color .15s, box-shadow .15s;
+    display: none;
+  }
+  .film.viditelny { display: block; }
+  .film:hover { transform: translateY(-4px); }
+  .film.vybrany {
+    border-color: var(--popcorn);
+    box-shadow: 0 0 24px rgba(255, 209, 102, .35);
+    transform: translateY(-4px) scale(1.03);
+  }
+  /* lehce zvýrazněné tipy */
+  .film.tip { border-color: rgba(255, 122, 162, .45); }
+  .film.tip:hover { border-color: rgba(255, 122, 162, .8); }
+  .film .tip-stitek {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(255, 122, 162, .92); color: var(--noc);
+    font-size: 10.5px; font-weight: 700; letter-spacing: .5px;
+    padding: 3px 9px; border-radius: 999px;
+  }
+  .film.vybrany.tip { border-color: var(--popcorn); }
+  .film .plakat-box {
+    aspect-ratio: 2 / 3; background: #1a1233;
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .film .plakat-box img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .film .emoji-nahrada { font-size: 52px; display: none; }
+  .film .info { padding: 10px 8px 12px; }
+  .film .nazev { font-weight: 700; font-size: 13.5px; line-height: 1.3; }
+  .film .zanr-stitek { font-size: 11px; color: #a89cc9; margin-top: 3px; }
+  .film .fajfka {
+    position: absolute; top: 8px; right: 8px; background: var(--popcorn); color: var(--noc);
+    width: 28px; height: 28px; border-radius: 50%; display: none;
+    align-items: center; justify-content: center; font-weight: 700; font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .film.vybrany .fajfka { display: flex; }
+
+  .otazka { font-size: 20px; font-weight: 600; margin-bottom: 14px; }
+
+  .zprava-box { margin-bottom: 20px; }
+  .zprava-box input {
+    width: 100%; max-width: 420px; background: var(--karta); border: 2px solid #3a2e5e;
+    border-radius: 12px; padding: 12px 16px; color: var(--svetlo); font-size: 15px;
+    font-family: inherit; outline: none; transition: border-color .15s;
+  }
+  .zprava-box input:focus { border-color: var(--popcorn); }
+  .zprava-box input::placeholder { color: #6f6396; }
+
+  .tlacitka {
+    display: flex; justify-content: center; align-items: center;
+    gap: 18px; flex-wrap: wrap; min-height: 90px;
+  }
+  button.akce {
+    font-family: inherit; font-weight: 700; border: none; border-radius: 999px;
+    cursor: pointer; transition: transform .15s, font-size .2s, padding .2s, opacity .2s;
+  }
+  #ano {
+    background: linear-gradient(135deg, var(--popcorn), var(--maslo));
+    color: var(--noc); font-size: 20px; padding: 16px 38px;
+    box-shadow: 0 6px 20px rgba(255, 209, 102, .3);
+  }
+  #ano:hover { transform: scale(1.06); }
+  #ano:disabled { opacity: .6; cursor: wait; transform: none; }
+  #ne { background: #3a2e5e; color: #b7a9dd; font-size: 16px; padding: 12px 26px; }
+
+  .vysledek { display: none; animation: naskoc .5s ease; }
+  .vysledek.zobraz { display: block; }
+  @keyframes naskoc {
+    from { opacity: 0; transform: translateY(20px) scale(.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .vysledek .velky { font-size: 70px; margin-bottom: 14px; }
+  .vysledek h2 { font-size: 30px; margin-bottom: 10px; color: var(--popcorn); }
+  .vysledek p { color: #cabfe6; font-size: 17px; line-height: 1.6; }
+  .vysledek .film-jmeno { color: var(--ruzova); font-weight: 700; }
+
+  .paticka { margin-top: 50px; font-size: 13px; color: #6f6396; }
+
+  .konfeta {
+    position: fixed; top: -20px; font-size: 22px;
+    animation: pad linear forwards; pointer-events: none; z-index: 5;
+  }
+  @keyframes pad { to { transform: translateY(110vh) rotate(720deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    *, .hvezda, .konfeta { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="obsah" id="hlavni">
+  <div class="stitek">🎬 Soukromé kino · dnes večer · u mě doma</div>
+  <h1>Filmový večer <span class="zvyraz">se mnou?</span> 🍿</h1>
+  <p class="podtext">Deka ✅ &nbsp; Popcorn ✅ &nbsp; Gauč ✅<br>Chybí jen <b>ty</b> a jeden film. Vyber si:</p>
+
+  <div class="filtry" id="filtry"></div>
+  <div class="filmy" id="filmy"></div>
+
+  <div class="otazka" id="otazka">Tak co, jdeš do toho? 🥺</div>
+  <div class="zprava-box">
+    <input type="text" id="zprava" placeholder="Chceš mi něco vzkázat? (nepovinné)" maxlength="200">
+  </div>
+  <div class="tlacitka">
+    <button class="akce" id="ano">ANO! 🍿❤️</button>
+    <button class="akce" id="ne">Hmm, nevím…</button>
+  </div>
+</div>
+
+<div class="obsah vysledek" id="vysledek">
+  <div class="velky">🎉🍿❤️</div>
+  <h2>JOOO! Tak dneska večer!</h2>
+  <p id="vysledekText">Odpověď letí ke mně do mailu. Těším se na tebe! 😘</p>
+  <p class="paticka" style="margin-top:30px;">P.S. Dress code: pyžamo vítáno. 🧦</p>
+</div>
+
+<div class="paticka">Vstupenka zdarma · platba v objetích 🎟️</div>
+
+<script>
+  // ⚙️ NASTAVENÍ — sem dej svůj e-mail (FormSubmit na něj pošle odpověď)
+  const MUJ_EMAIL = "tvuj@email.cz";
+
+  // 🖼️ TMDB — zdarma API klíč z https://www.themoviedb.org/settings/api
+  // Když ho vyplníš, plakáty se natáhnou automaticky. Jinak platí:
+  // lokální soubor ve složce "plakaty/" → emoji jako záloha.
+  const TMDB_API_KEY = "";
+
+  // 🎬 FILMY — tip: true = zvýrazněná karta ("můj tip")
+  // tmdb + rok = přesný dotaz pro vyhledání plakátu na TMDB
+  const FILMY = [
+    // Animáky
+    { nazev: "Karcoolka", zanr: "Animák", emoji: "🐺", plakat: "karcoolka.jpg", tip: true, tmdb: "Hoodwinked", rok: 2005 },
+    { nazev: "Jako kočky a psi: Pomsta prohnané Kitty", zanr: "Animák", emoji: "🐱", plakat: "kocky-a-psi.jpg", tmdb: "Cats & Dogs: The Revenge of Kitty Galore", rok: 2010 },
+    { nazev: "Shrek", zanr: "Animák", emoji: "🧅", plakat: "shrek.jpg", tmdb: "Shrek", rok: 2001 },
+    { nazev: "Ratatouille", zanr: "Animák", emoji: "🐭", plakat: "ratatouille.jpg", tip: true, tmdb: "Ratatouille", rok: 2007 },
+    { nazev: "Kung Fu Panda", zanr: "Animák", emoji: "🐼", plakat: "kung-fu-panda.jpg", tmdb: "Kung Fu Panda", rok: 2008 },
+    { nazev: "Coco", zanr: "Animák", emoji: "🎸", plakat: "coco.jpg", tmdb: "Coco", rok: 2017 },
+    { nazev: "Vzhůru do oblak", zanr: "Animák", emoji: "🎈", plakat: "vzhuru-do-oblak.jpg", tip: true, tmdb: "Up", rok: 2009 },
+    { nazev: "V hlavě", zanr: "Animák", emoji: "😊", plakat: "v-hlave.jpg", tmdb: "Inside Out", rok: 2015 },
+    // Fantasy / dobrodružné
+    { nazev: "Pán prstenů: Společenstvo prstenu", zanr: "Fantasy", emoji: "💍", plakat: "pan-prstenu.jpg", tmdb: "The Lord of the Rings: The Fellowship of the Ring", rok: 2001 },
+    { nazev: "Harry Potter a Kámen mudrců", zanr: "Fantasy", emoji: "🪄", plakat: "harry-potter.jpg", tmdb: "Harry Potter and the Philosopher's Stone", rok: 2001 },
+    { nazev: "Piráti z Karibiku: Prokletí Černé perly", zanr: "Fantasy", emoji: "☠️", plakat: "pirati-z-karibiku.jpg", tmdb: "Pirates of the Caribbean: The Curse of the Black Pearl", rok: 2003 },
+    { nazev: "Jumanji: Vítejte v džungli", zanr: "Fantasy", emoji: "🎮", plakat: "jumanji.jpg", tmdb: "Jumanji: Welcome to the Jungle", rok: 2017 },
+    // Komedie
+    { nazev: "Slunce, seno, jahody", zanr: "Komedie", emoji: "🌾", plakat: "slunce-seno-jahody.jpg", tip: true, tmdb: "Slunce, seno, jahody", rok: 1983 },
+    { nazev: "Pelíšky", zanr: "Komedie", emoji: "🏠", plakat: "pelisky.jpg", tmdb: "Pelíšky", rok: 1999 },
+    { nazev: "Blbý a blbější", zanr: "Komedie", emoji: "🚗", plakat: "blby-a-blbejsi.jpg", tmdb: "Dumb and Dumber", rok: 1994 },
+    { nazev: "Noc v muzeu", zanr: "Komedie", emoji: "🏛️", plakat: "noc-v-muzeu.jpg", tmdb: "Night at the Museum", rok: 2006 },
+    { nazev: "Maska", zanr: "Komedie", emoji: "🎭", plakat: "maska.jpg", tmdb: "The Mask", rok: 1994 },
+    // Sci-fi / napětí
+    { nazev: "Marťan", zanr: "Sci-fi", emoji: "🥔", plakat: "martan.jpg", tmdb: "The Martian", rok: 2015 },
+    { nazev: "Ready Player One", zanr: "Sci-fi", emoji: "🕹️", plakat: "ready-player-one.jpg", tmdb: "Ready Player One", rok: 2018 },
+    { nazev: "Já, robot", zanr: "Sci-fi", emoji: "🤖", plakat: "ja-robot.jpg", tmdb: "I, Robot", rok: 2004 }
+  ];
+
+  // hvězdičky na pozadí
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('div');
+    s.className = 'hvezda';
+    s.textContent = Math.random() > 0.5 ? '✦' : '·';
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.top = Math.random() * 100 + 'vh';
+    s.style.fontSize = (8 + Math.random() * 12) + 'px';
+    s.style.animationDelay = Math.random() * 3 + 's';
+    document.body.appendChild(s);
+  }
+
+  // vykreslení filtrů
+  const zanry = ["Všechny", ...new Set(FILMY.map(f => f.zanr))];
+  const filtryEl = document.getElementById('filtry');
+  zanry.forEach((z, idx) => {
+    const b = document.createElement('button');
+    b.className = 'filtr' + (idx === 0 ? ' aktivni' : '');
+    b.textContent = z;
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.filtr').forEach(x => x.classList.remove('aktivni'));
+      b.classList.add('aktivni');
+      filtruj(z);
+    });
+    filtryEl.appendChild(b);
+  });
+
+  // vykreslení filmů
+  let vybranyFilm = null;
+  const filmyEl = document.getElementById('filmy');
+  FILMY.forEach(f => {
+    const d = document.createElement('div');
+    d.className = 'film viditelny' + (f.tip ? ' tip' : '');
+    d.dataset.zanr = f.zanr;
+    d.innerHTML = `
+      <div class="plakat-box">
+        <img src="plakaty/${f.plakat}" alt="${f.nazev}"
+             onerror="this.style.display='none'; this.parentElement.querySelector('.emoji-nahrada').style.display='block'">
+        <div class="emoji-nahrada">${f.emoji}</div>
+        ${f.tip ? '<div class="tip-stitek">💛 můj tip</div>' : ''}
+        <div class="fajfka">✓</div>
+      </div>
+      <div class="info">
+        <div class="nazev">${f.nazev}</div>
+        <div class="zanr-stitek">${f.zanr}</div>
+      </div>`;
+    d.addEventListener('click', () => {
+      document.querySelectorAll('.film').forEach(x => x.classList.remove('vybrany'));
+      d.classList.add('vybrany');
+      vybranyFilm = f.nazev;
+      document.getElementById('otazka').textContent = 'Skvělá volba! Tak co, jdeš do toho? 🥺';
+    });
+    filmyEl.appendChild(d);
+    f._el = d;
+  });
+
+  // 🖼️ automatické natažení plakátů z TMDB (když je vyplněný API klíč)
+  if (TMDB_API_KEY) {
+    FILMY.forEach(async f => {
+      try {
+        const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}` +
+                    `&query=${encodeURIComponent(f.tmdb)}&year=${f.rok}&language=cs-CZ`;
+        const res = await fetch(url);
+        const json = await res.json();
+        const poster = json.results && json.results[0] && json.results[0].poster_path;
+        if (poster) {
+          const img = f._el.querySelector('img');
+          img.style.display = 'block';
+          f._el.querySelector('.emoji-nahrada').style.display = 'none';
+          img.src = `https://image.tmdb.org/t/p/w342${poster}`;
+        }
+      } catch (e) { /* nechá lokální soubor / emoji */ }
+    });
+  }
+
+  function filtruj(zanr) {
+    document.querySelectorAll('.film').forEach(f => {
+      f.classList.toggle('viditelny', zanr === 'Všechny' || f.dataset.zanr === zanr);
+    });
+  }
+
+  // tlačítko NE se zmenšuje, ANO roste
+  const ne = document.getElementById('ne');
+  const ano = document.getElementById('ano');
+  const hlasky = ['Hmm, nevím…', 'Určitě? 🥺', 'Zkus to znovu 😄', 'Popcorn bude…', 'No taaak…', '🥺👉👈'];
+  let pokus = 0, velikostAno = 20, velikostNe = 16;
+
+  ne.addEventListener('click', () => {
+    pokus++;
+    velikostNe = Math.max(8, velikostNe - 2);
+    velikostAno = Math.min(34, velikostAno + 3);
+    ne.style.fontSize = velikostNe + 'px';
+    ne.style.padding = Math.max(4, 12 - pokus * 2) + 'px ' + Math.max(10, 26 - pokus * 3) + 'px';
+    ano.style.fontSize = velikostAno + 'px';
+    ano.style.padding = (16 + pokus * 3) + 'px ' + (38 + pokus * 6) + 'px';
+    ne.textContent = hlasky[Math.min(pokus, hlasky.length - 1)];
+    if (pokus >= 5) { ne.style.opacity = '0'; ne.style.pointerEvents = 'none'; }
+  });
+
+  // ANO → odeslat e-mail přes FormSubmit + oslava
+  ano.addEventListener('click', async () => {
+    ano.disabled = true;
+    ano.textContent = 'Odesílám… 💌';
+
+    const data = {
+      odpoved: "ANO! 🎉",
+      film: vybranyFilm || "(žádný film nevybrala — vybereme spolu)",
+      vzkaz: document.getElementById('zprava').value || "(bez vzkazu)",
+      _subject: "🍿 Filmový večer: ANO!"
+    };
+
+    let odeslano = false;
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/${MUJ_EMAIL}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(data)
+      });
+      odeslano = res.ok;
+    } catch (e) {
+      odeslano = false;
+    }
+
+    // fallback: když se AJAX nepovede (např. otevřeno jako soubor), otevře se e-mail klient
+    if (!odeslano) {
+      const telo = encodeURIComponent(`Odpověď: ANO! 🎉\nFilm: ${data.film}\nVzkaz: ${data.vzkaz}`);
+      window.location.href = `mailto:${MUJ_EMAIL}?subject=${encodeURIComponent(data._subject)}&body=${telo}`;
+    }
+
+    // oslava
+    document.getElementById('hlavni').style.display = 'none';
+    const v = document.getElementById('vysledek');
+    v.classList.add('zobraz');
+    if (vybranyFilm) {
+      document.getElementById('vysledekText').innerHTML =
+        'Dnes večer dáváme <span class="film-jmeno">' + vybranyFilm + '</span>!<br>' +
+        (odeslano ? 'Odpověď mi právě přistála v mailu. 💌' : 'Odpověď se pošle přes tvůj e-mail. 💌') +
+        ' Těším se na tebe! 😘';
+    }
+    const kousky = ['🍿', '❤️', '🎬', '⭐', '💛', '🎉'];
+    for (let i = 0; i < 40; i++) {
+      const k = document.createElement('div');
+      k.className = 'konfeta';
+      k.textContent = kousky[Math.floor(Math.random() * kousky.length)];
+      k.style.left = Math.random() * 100 + 'vw';
+      k.style.animationDuration = (2 + Math.random() * 2.5) + 's';
+      k.style.animationDelay = Math.random() * 0.8 + 's';
+      document.body.appendChild(k);
+      setTimeout(() => k.remove(), 6000);
+    }
+  });
+</script>
+</body>
+</html>
